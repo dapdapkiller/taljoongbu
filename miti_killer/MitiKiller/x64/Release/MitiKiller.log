@@ -1,0 +1,23 @@
+﻿  Building 'MitiKiller' with toolset 'WindowsKernelModeDriver10.0' and the 'Desktop' target platform.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(402,5): warning MSB8038: 스펙터 완화가 사용하도록 설정되어 있지만 스펙터 완화된 라이브러리를 찾을 수 없습니다. Visual Studio 워크로드에 스펙터 완화된 라이브러리가 포함되어 있는지 확인하세요. 자세한 내용은 https://aka.ms/Ofhn4c를 참조하세요.
+  Stamping x64\Release\MitiKiller.inf
+  Stamping [Version] section with DriverVer=05/01/2019,9.23.53.355
+  MitiKiller.c
+  MitiKiller.vcxproj -> D:\Cheat\Practice\MitiKiller\x64\Release\MitiKiller.sys
+  Done Adding Additional Store
+  Successfully signed: D:\Cheat\Practice\MitiKiller\x64\Release\MitiKiller.sys
+  
+  .........................
+  Signability test complete.
+  
+  Errors:
+  None
+  
+  Warnings:
+  None
+  
+  Catalog generation complete.
+  D:\Cheat\Practice\MitiKiller\x64\Release\MitiKiller\mitikiller.cat
+  Done Adding Additional Store
+  Successfully signed: D:\Cheat\Practice\MitiKiller\x64\Release\MitiKiller\mitikiller.cat
+  

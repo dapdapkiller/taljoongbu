@@ -1,0 +1,21 @@
+﻿  injector_main.cpp
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(195): warning C4312: '형식 캐스트': 'DWORD'에서 더 큰 'HANDLE'(으)로의 변환입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(196): warning C4312: '형식 캐스트': 'DWORD'에서 더 큰 'HANDLE'(으)로의 변환입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(201): warning C4311: '형식 캐스트': 'HANDLE'에서 'DWORD'(으)로 포인터가 잘립니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(201): warning C4302: '형식 캐스트': 'HANDLE'에서 'DWORD'(으)로 잘립니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(214): warning C4477: 'printf_s' : 서식 문자열 '%p'에 'void *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'NTSTATUS'입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(214): warning C4313: 'printf_s': 서식 문자열의 '%p'이(가) 인수 1('NTSTATUS' 형식)과(와) 충돌합니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(214): warning C4477: 'printf_s' : 서식 문자열 '%p'에 'void *' 형식의 인수가 필요하지만 variadic 인수 2의 형식이 'DWORD'입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(214): warning C4313: 'printf_s': 서식 문자열의 '%p'이(가) 인수 2('DWORD' 형식)과(와) 충돌합니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(216): warning C4477: 'printf_s' : 서식 문자열 '%p'에 'void *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'DWORD'입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(216): warning C4313: 'printf_s': 서식 문자열의 '%p'이(가) 인수 1('DWORD' 형식)과(와) 충돌합니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(216): warning C4477: 'printf_s' : 서식 문자열 '%p'에 'void *' 형식의 인수가 필요하지만 variadic 인수 2의 형식이 'DWORD'입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(216): warning C4313: 'printf_s': 서식 문자열의 '%p'이(가) 인수 2('DWORD' 형식)과(와) 충돌합니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(125): warning C4101: 'abc' :참조되지 않은 지역 변수입니다.
+e:\졸업작품\gitfolder\dll_injector\dll_injector\dll_injector\injector_main.cpp(124): warning C4101: 'TestHandle' :참조되지 않은 지역 변수입니다.
+  코드를 생성하고 있습니다.
+  1 of 20 functions ( 5.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  코드를 생성했습니다.
+  dll_injector.vcxproj -> E:\졸업작품\GitFolder\dll_injector\dll_injector\x64\Release\dll_injector.exe

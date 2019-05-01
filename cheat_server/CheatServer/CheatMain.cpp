@@ -5,24 +5,27 @@
 #include "undocument.h"
 #include "pipe.h"
 
-#pragma comment (lib, "ntdll.dll")
+#pragma comment (lib, "ntdll.lib")
 
-#define PIPE_NAME "\\\\.\\pipe\\mypipe"
+#define PIPE_NAME "\\\\.\\pipe\\CheatPipe"
 #define ERROR_MACRO(x) std::cout << "[DBG] Can't call " << x << " Reason: "<< GetLastError() <<  std::endl;
+static int howmuch;
 
 // TODO: GetHandleList from csrss
 // -> NtQuerySystemInformation
-PSYSTEM_HANDLE_INFORMATION GetSystemHandleInfomation();
+PPROCESS_HANDLE_SNAPSHOT_INFORMATION GetInsideProcessHandle();
 DWORD ImageNameToProcessId(const char* ImageName);
-HANDLE GetTargetProcessHandle(PSYSTEM_HANDLE_INFORMATION pshi, DWORD pid);
+HANDLE GetTargetProcessHandle(PPROCESS_HANDLE_SNAPSHOT_INFORMATION phsi, DWORD pid);
 
 BOOL ServerThread(LPVOID lParam)
 {
 	char proc_name[256] = { 0, };
 	HANDLE hPipe, hTargetProcess;
-	REQUEST_HEADER req;
-	PSYSTEM_HANDLE_INFORMATION HandleInfo;
+	PPROCESS_HANDLE_SNAPSHOT_INFORMATION HandleInfo;
 	DWORD TargetPid;
+	DWORD read_byte = 0;
+
+	REPLY_HEADER rep;
 
 	hPipe = CreateNamedPipe(
 		PIPE_NAME, 
@@ -34,21 +37,21 @@ BOOL ServerThread(LPVOID lParam)
 		NMPWAIT_USE_DEFAULT_WAIT,
 		NULL
 	);
-	if (!hPipe){
-		ERROR_MACRO("CreateNamedPipe");
-		return false;
-	}
-	while (1)
-	{
-		if (ConnectNamedPipe(hPipe, NULL)){
-			ReadFile(hPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL);
-			switch (req.type)
+	if (ConnectNamedPipe(hPipe, NULL)){
+		while (1) {
+			ReadFile(hPipe, &rep, sizeof(REPLY_HEADER), NULL, NULL);
+			switch (rep.type)
 			{
 			case CHEAT_LIST::GetTargetHandle:
-				if (!ReadFile(hPipe, proc_name, 256, NULL, NULL)) ERROR_MACRO("ReadFile");
-				HandleInfo = GetSystemHandleInfomation();
-				TargetPid = ImageNameToProcessId(proc_name);
+				HandleInfo = GetInsideProcessHandle();
+				TargetPid = ImageNameToProcessId(rep.buffer);
 				hTargetProcess = GetTargetProcessHandle(HandleInfo, TargetPid);
+				REQUEST_HEADER req;
+				req.type = CHEAT_LIST::GetTargetHandle;
+				req.address = 0;
+				req.return_value = (uint32_t)hTargetProcess;
+				if (!WriteFile(hPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL)) ERROR_MACRO("WriteFile");
+				free(HandleInfo);
 				break;
 			case CHEAT_LIST::Read:
 				break;
@@ -58,41 +61,14 @@ BOOL ServerThread(LPVOID lParam)
 				break;
 			case CHEAT_LIST::ScriptOff:
 				break;
-			default:
-				std::cout << "Unknown command" << std::endl;
 			}
-			/*
-			if (req.type == 1)
-			{
-				if (ReadProcessMemory(hProcess, (LPCVOID)req->Address, &buf, req->nRead, NULL))
-				{
-					std::cout << "RPM Success Sending.." << std::endl;
-					memcpy(rep->buf, buf, 10);
-					rep->nRead = req->nRead;
-					WriteFile(hPipe, rep, sizeof(RPMRep), NULL, NULL);
-				}
-				else
-				{
-					std::cout << "RPM Failed.. " << std::endl;
-				}
-			}
-			else
-			{
-				cout << "Unknown Commands" << endl;
-			}
-			*/
 		}
-		else{
-			std::cout << "Waiting client.." << std::endl;
-			Sleep(1000);
-		}
-		Sleep(10);
 	}
-	free(HandleInfo);
+	return 0;
 }
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,  DWORD fdwReason, LPVOID lpReserved)  
 {
-	HANDLE hThread;
+	HANDLE hThread = 0;
 	switch (fdwReason)
 	{
 	case DLL_PROCESS_ATTACH:
@@ -100,7 +76,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,  DWORD fdwReason, LPVOID lpReserved)
 		break;
 
 	case DLL_THREAD_ATTACH:
-		std::cout << "Create MyServerThread :)" << std::endl;
 		// Do thread-specific initialization.
 		break;
 
@@ -113,40 +88,37 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,  DWORD fdwReason, LPVOID lpReserved)
 		// Perform any necessary cleanup.
 		break;
 	}
+	Sleep(2000);
+	//SwitchToThread();
+	//Sleep(2000);
 	return TRUE;
 }
-PSYSTEM_HANDLE_INFORMATION GetSystemHandleInfomation(){
-	ULONG temp_len;
-	BYTE* buffer;
+#define BASIC_BUFFER_CHECKER
 
-	// Get length of struct
-	if (!NtQuerySystemInformation(
-		SYSTEM_INFORMATION_CLASS::SystemExtendedHandleInformation,
-		NULL,
-		NULL,
-		&temp_len
-	)) {
-		ERROR_MACRO("Get NtQuerySystemInformation Length");
-		return 0;
-	}
-	else {
-		buffer = (BYTE*)malloc(temp_len);
-	}
-	if (!NtQuerySystemInformation(
-		SYSTEM_INFORMATION_CLASS::SystemExtendedHandleInformation,
-		(PVOID)buffer,
-		temp_len,
-		&temp_len
-	)){
-		ERROR_MACRO("Set NtQuerySystemInformation");
-		return 0;
-	}
-	return (PSYSTEM_HANDLE_INFORMATION)buffer;
+PPROCESS_HANDLE_SNAPSHOT_INFORMATION GetInsideProcessHandle() {
+	NTSTATUS status = STATUS_INFO_LENGTH_MISMATCH; // must intialize mismatch
+	ULONG handle_len = 0;
+	char* buffer = (char*)malloc(handle_len); // base
+
+	do {
+		if (status == STATUS_INFO_LENGTH_MISMATCH) {
+			free(buffer);
+			buffer = (char*)malloc(handle_len);
+		}
+	} while (status = NtQueryInformationProcess(
+		GetCurrentProcess(),
+		(PROCESSINFOCLASS)51,
+		buffer,
+		handle_len,
+		&handle_len
+	));
+	return (PPROCESS_HANDLE_SNAPSHOT_INFORMATION)buffer;
 }
 DWORD ImageNameToProcessId(const char* ImageName) {
 	PROCESSENTRY32 ProcessEntry;
 	HANDLE hSnapShot;
 
+	ProcessEntry.dwSize = sizeof(PROCESSENTRY32);
 	hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (!hSnapShot){
 		ERROR_MACRO("CreateToolhelp32Snapshot");
@@ -154,21 +126,23 @@ DWORD ImageNameToProcessId(const char* ImageName) {
 	}
 	Process32First(hSnapShot, &ProcessEntry);
 	do {
-		if (!strncmp(ProcessEntry.szExeFile, ImageName, 9))
-		{
-			return ProcessEntry.th32ProcessID;
+		if (!strncmp(ProcessEntry.szExeFile, ImageName, strlen(ImageName))){
+			DWORD session_id;
+			ProcessIdToSessionId(ProcessEntry.th32ProcessID, &session_id);
+			if (session_id == 1) // check only session1
+				return ProcessEntry.th32ProcessID;
 		}
 	} while (Process32Next(hSnapShot, &ProcessEntry));
-
 	return 0;
 }
-HANDLE GetTargetProcessHandle(PSYSTEM_HANDLE_INFORMATION pshi, DWORD pid) {
-	ULONG HandleCount = pshi->NumberOfHandles;
-	for (ULONG i = 0; i < HandleCount; i++)
-	{
-		if (pshi->Handle[i].UniqueProcessId == pid)
-		{
-			return (HANDLE)(pshi->Handle[i].HandleValue);
+HANDLE GetTargetProcessHandle(PPROCESS_HANDLE_SNAPSHOT_INFORMATION phsi, DWORD pid){
+	for (ULONG i = 0; i < phsi->NumberOfHandles; i++){
+		if (phsi->Handles[i].ObjectTypeIndex == OBJECT_TYPE_PROCESS || 
+			phsi->Handles[i].ObjectTypeIndex == OBJECT_TYPE_JOB){
+			if (GetProcessId(phsi->Handles[i].HandleValue) == pid)
+			{
+				return (HANDLE)(phsi->Handles[i].HandleValue);
+			}
 		}
 	}
 	std::cout << "can't find pid's handle" << std::endl;
