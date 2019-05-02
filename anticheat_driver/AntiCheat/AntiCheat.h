@@ -17,14 +17,8 @@
 #define PROCESS_QUERY_LIMITED_INFORMATION  (0x1000)  
 #define PROCESS_SET_LIMITED_INFORMATION    (0x2000)  
 
-#pragma comment (lib, "ntoskrnl.lib")
-
-extern CHAR* PsGetProcessImageFileName(IN PEPROCESS Process);
-
-typedef struct _WHITE_LIST {
-	UNICODE_STRING WhiteList[5]; // Input system process likes csrss, lsass, winlogon, wininit, smss.
-	ULONG Count;
-}WHITE_LIST, *PWHITE_LIST;
+#define IO_CTL_PROCESS_PIPE_FIND CTL_CODE(FILE_DEVICE_UNKNOWN, 0x814, METHOD_BUFFERED , FILE_SPECIAL_ACCESS)
+#define IO_CTL_PROCESS_CALLBACK_REGISTER CTL_CODE(FILE_DEVICE_UNKNOWN, 0x815, METHOD_BUFFERED , FILE_SPECIAL_ACCESS)
 
 NTSTATUS create_dispatcher(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP irp);
 NTSTATUS device_control_dispatcher(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP irp);
