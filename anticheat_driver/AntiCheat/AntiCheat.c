@@ -72,23 +72,26 @@ NTSTATUS create_dispatcher(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP irp) {
 	ocr.Version = ObGetFilterVersion();
 	ocr.RegistrationContext = NULL;
 	ocr.Altitude = Altitude;
-
+	
 	Status = ObRegisterCallbacks(&ocr, &recevier);
 	if (Status) {
 		DbgPrint("[DBG] ObRegisterCallbacks failed.. Reason : %d\n", Status);
 	}
+	
 	return STATUS_SUCCESS;
 }
 NTSTATUS device_control_dispatcher(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP irp){
 	ULONG ControlCode;
 	PIO_STACK_LOCATION CurrentStackLocation;
-	PPROCESS_HANDLE_SNAPSHOT_INFORMATION pphsi;
+	PSYSTEM_HANDLE_INFORMATION_EX pshie;
 	PVOID CheckPID;
-	HANDLE CheckHandle;
-	CLIENT_ID ci;
-	NTSTATUS Status;
+//	HANDLE CheckHandle = 0;
+	//CLIENT_ID ci;
+	//NTSTATUS Status;
+//	PEPROCESS CheckEPROCESS;
+	DbgPrint("[DBG] device_control_dispatcher called..");
+
 	UNREFERENCED_PARAMETER(DeviceObject);
-	UNREFERENCED_PARAMETER(irp);
 
 	CurrentStackLocation = IoGetCurrentIrpStackLocation(irp);
 	ControlCode = CurrentStackLocation->Parameters.DeviceIoControl.IoControlCode;
@@ -97,16 +100,36 @@ NTSTATUS device_control_dispatcher(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP i
 	case IO_CTL_PROCESS_PIPE_FIND:
 		// TODO: GetPID, GetProcessHandle, NtQueryInformationProcess, GetHandleList, GetPipe, PipeCounting and monitoring..
 		CheckPID = GetProcessId(L"csrss.exe");
-		ci.UniqueProcess = (HANDLE)CheckPID;
-		Status = NtOpenProcess(&CheckHandle, PROCESS_ALL_ACCESS, NULL, &ci);
+		DbgPrint("[DBG] ProcessID : %x\n", CheckPID);
+		/*
+		Status = PsLookupProcessByProcessId(CheckPID, &CheckEPROCESS);
 		if (Status)
-			DbgPrint("[DBG] NtOpenProcess called failed.. Reason : %d :D\n", Status);
-		pphsi = GetInsideProcessHandle(CheckHandle);
-		if (IsCsrssHaveDangerPipe(pphsi) > 1) {
+			DbgPrint("[DBG] PsLookupProcessByProcessId called failed.. Reason : %d :D\n", Status);
+		Status = ObOpenObjectByPointer(
+			CheckEPROCESS,
+			OBJ_KERNEL_HANDLE,
+			NULL,
+			GENERIC_ALL,
+			*PsProcessType,
+			KernelMode,
+			&CheckHandle
+		);
+		if (Status)
+			DbgPrint("[DBG] ObOpenObjectByPointer called failed.. Reason : %d :D\n", Status);
+		Status = NtOpenProcess(&CheckHandle, GENERIC_ALL, NULL, &ci);
+		DbgPrint("[DBG] EPROCESS : %I64x\n", CheckEPROCESS);
+		DbgPrint("[DBG] Handle : %I64x\n", CheckHandle);
+		*/
+		pshie =  GetAllSystemHandle();
+		if (IsCsrssHaveDangerPipe(pshie, CheckPID) > 1) {
 			// TODO: Logging.. AutoBan.. Something..!
 			DbgPrint("[DBG] Hacked.. :( \n");
 		}
-		ExFreePool(pphsi);
+		else {
+			DbgPrint("[DBG] Not Hacked :)\n", CheckPID);
+		}
+		//ObCloseHandle(CheckHandle, KernelMode);
+		ExFreePool(pshie);
 		break;
 	case IO_CTL_PROCESS_CALLBACK_REGISTER:
 		break;

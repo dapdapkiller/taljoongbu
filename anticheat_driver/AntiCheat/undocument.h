@@ -1,8 +1,9 @@
 #pragma once
 #include <ntddk.h>
 #include <wdm.h>
+#include <ntifs.h>
 
-#define OBJECT_TYPE_FILE 23
+#define OBJECT_TYPE_FILE 31
 #pragma comment (lib, "ntoskrnl.lib")
 
 typedef enum _SYSTEM_INFORMATION_CLASS {
@@ -236,6 +237,18 @@ typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO {
 	PVOID Object;
 	ULONG GrantedAccess;
 }SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
+// Requst of all system handles extended
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX
+{
+	PVOID Object;
+	ULONG_PTR UniqueProcessId;
+	ULONG_PTR HandleValue;
+	ULONG GrantedAccess;
+	USHORT CreatorBackTraceIndex;
+	USHORT ObjectTypeIndex;
+	ULONG HandleAttributes;
+	ULONG Reserved;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX;
 // Request of target handle 
 typedef struct _PROCESS_HANDLE_TABLE_ENTRY_INFO {
 	HANDLE HandleValue;
@@ -251,6 +264,13 @@ typedef struct _SYSTEM_HANDLE_INFORMATION {
 	ULONG NumberOfHandles;
 	SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
 }SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+// Request of all system handle extended
+typedef struct _SYSTEM_HANDLE_INFORMATION_EX
+{
+	ULONG_PTR NumberOfHandles;
+	ULONG_PTR Reserved;
+	SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX Handles[1];
+} SYSTEM_HANDLE_INFORMATION_EX, *PSYSTEM_HANDLE_INFORMATION_EX;
 // Request of target handle 
 typedef struct _PROCESS_HANDLE_SNAPSHOT_INFORMATION {
 	ULONG_PTR NumberOfHandles;
