@@ -1,4 +1,6 @@
 #include "Utility.h"
+// TEXT 오류시 사용
+#include <winnt.rh>
 #pragma warning (disable:4996)
 
 // Undocumented Function type definition

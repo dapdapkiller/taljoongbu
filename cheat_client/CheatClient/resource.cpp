@@ -8,8 +8,8 @@
 
 #pragma warning (disable:4996)
 
-#define PIPE_NAME "\\\\.\\pipe\\CheatPipe"
-#define MAX_BUFFER 256
+constexpr auto PIPE_NAME = "\\\\.\\pipe\\CheatPipe";
+constexpr auto MAX_BUFFER = 256;
 
 BOOL CALLBACK DialogProc(HWND arg1, UINT arg2, WPARAM wParam, LPARAM lParam);
 LPTHREAD_START_ROUTINE ThreadProc(LPVOID lParam);
@@ -17,10 +17,10 @@ LPTHREAD_START_ROUTINE ThreadProc(LPVOID lParam);
 HANDLE hClientPipe = 0;
 static bool dialog_state = true;
 static char temp_process_buffer[256] = { 0, };
-std::string command = "initinitinitinitiit";
-std::string command_list = "req;rep;process;script";
+std::string command(MAX_BUFFER, '\0');
+std::string command_list(MAX_BUFFER, '\0');
 
-int main(int argc, char** argv)
+int main_before(int argc, char** argv)
 {
 	HANDLE hTargetProcess = INVALID_HANDLE_VALUE;
 	HANDLE MyThread;
@@ -67,7 +67,11 @@ LPTHREAD_START_ROUTINE ThreadProc(LPVOID lParam) {
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
 		}
-		std::regex get_command("!([a-z]+)\\s0x([0-9]+)\\s*([0-9]+){0,}");
+		// [ ÆÄ½Ì Çü½Ä ]
+		// ex) !process 0x1234 5678
+		std::regex get_command("!([a-z]+) 0x([0-9]+) {0,}([0-9]*)");
+//		std::regex get_command("!([^ ]*) 0x([^ ]*) {0,}([^ ]*)");
+//		std::regex get_command("!([a-z]+)\\s0x([0-9]+)\\s*([0-9]+){0,}");
 		std::smatch base_match;
 
 		if (std::regex_search(command, base_match, get_command))
