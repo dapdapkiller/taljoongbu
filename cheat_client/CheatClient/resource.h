@@ -39,3 +39,6 @@
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
+
+constexpr auto PIPE_NAME = "\\\\.\\pipe\\CheatPipe";
+constexpr auto MAX_BUFFER = 256;

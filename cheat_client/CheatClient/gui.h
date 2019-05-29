@@ -5,7 +5,7 @@
 #include "gui_class.h"
 
 bool button_call1(std::list<nanogui::Button*> btnList, int before, int after);
-bool img_button_call(std::list<nanogui::Button*> btnList, int before, int after);
+bool button_check(std::list<nanogui::Button*> btnList, int before, int after);
 bool submit_button();
 
 /* image directory path */
@@ -28,6 +28,11 @@ std::string imageDirectory("img/");
 	imgPanel->setImages(icons);						\
 	imgPanel->setFixedSize({ 74, 74 });				\
 	imgPanel->setPosition({ width, height });
+
+#define PUSH_BACK_LABEL(log)							\
+	labelLog = new Label(wrapper_log, "");	\
+	labelLog->setFontSize(20);							\
+	labelLog->setCaption(log);
 
 
 /* GUI 사이즈 정의 */
