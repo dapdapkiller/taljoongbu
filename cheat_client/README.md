@@ -23,7 +23,7 @@ git clone https://github.com/wjakob/nanogui.git --recursive
 __2. 프로젝트 빌드__
 
   CMake 를 활용하여 프로젝트 빌드  
-  CMake 에 관한 자세한 사용 방법은 [부록 - CMake](#CMake) 참조
+  CMake 에 관한 자세한 사용 방법은 [부록 - CMake](#-cmake-) 참조
 
 __3. 솔루션 빌드__
 
@@ -58,19 +58,17 @@ __1. 다운로드__
 
 __2. GUI 실행__
 
-  2-1. 현재 폴더에 __build__ 폴더 생성(.sln, .vcxproj, .lib, .exe 등 빌드시 생성되는 파일이 담기는 경로)
-  2-2. cmake-gui 실행
-  2-3. Where is the source Code: git clone 한 __nanogui__ 경로 입력
-  2-4. Where to build the binaries: 생성한 __build__ 경로 입력
-  2-5. __Configure__ 버튼 클릭
-  2-6. Specify the generator for this project: __Visual Studio 15 2017__ 로 설정
+  2-1. 현재 폴더에 __build__ 폴더 생성(.sln, .vcxproj, .lib, .exe 등 빌드시 생성되는 파일이 담기는 경로)  
+  2-2. cmake-gui 실행  
+  2-3. Where is the source Code: git clone 한 __nanogui__ 경로 입력  
+  2-4. Where to build the binaries: 생성한 __build__ 경로 입력  
+  2-5. __Configure__ 버튼 클릭  
+  2-6. Specify the generator for this project: __Visual Studio 15 2017__ 로 설정  
   2-7. __Finish__ 버튼 클릭
-
 <p align="center">
   <image src="https://user-images.githubusercontent.com/37067785/58466897-90159100-8175-11e9-953e-d0a53c19010b.png" width="70%" height="70%">
   <h6 align="center">[그림4] CMake 실행</h6>
 </p>
-
 
   2-8. Configuring done 메시지가 확인되면, __Generate__ 버튼 클릭
 
