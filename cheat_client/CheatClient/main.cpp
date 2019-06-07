@@ -9,13 +9,6 @@
 using namespace nanogui;
 using namespace std;
 
-string ERROR_MESSAGE(256, '\0');
-Label* labelLog;
-vector<Label*> labelList;
-
-VScrollPanel *vscroll_log;
-Widget *wrapper_log;
-
 HANDLE hClientPipe = 0;
 HANDLE hSCMgr = 0;
 
@@ -23,7 +16,7 @@ int main(int /* argc */, char ** /* argv */) {
 	nanogui::init();
 	{
 		// create a fixed size screen with one window
-		Screen *screen = new Screen({ width, height }, "Client", false);
+		Screen *screen = new Screen({ width, height }, "PPL Bypass", false);
 		Window *window = new Window(screen, "");
 		window->setPosition({ 0, 0 });
 		window->setFixedSize({ width, height });
@@ -61,107 +54,74 @@ int main(int /* argc */, char ** /* argv */) {
 		textBox->setPosition({ width_20per, 25 });
 		textBox->requestFocus();
 
-		// submit button
-//		int flag = 0;
-//		int order_flag[] = { 1,2,0,3,4,5,6 };
+		// Submit button
 		list<Button*> buttonList;
-//		static list<Button*>::iterator iter;
-//		auto it = buttonList.begin();
-		string procName = "";
 		Button *button;
-		ADD_BUTTON("submit", 28, width_10per, height_10per, width_50per + width_20per + 10, 25, false)
-		button->setCallback([&buttonList, textBox, &procName] { procName = textBox->value().c_str(); button_call1(buttonList, (int)SUBMIT, (int)CONNECTION); cout << "[INFO] ProcessName: " << procName.c_str() << endl; }); //  수정 필요
-
+		ADD_BUTTON("submit", 28, width_10per, height_10per, width_50per + width_20per + 10, 25, false);
+		button->setCallback([&buttonList, textBox] { processName = textBox->value().c_str(); button_call1(buttonList, (int)SUBMIT, (int)CONNECTION); }); //  수정 필요
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		NVGcontext *temp = screen->nvgContext();
 		ImagePanel *imgPanel;
 		vector<pair<int, string>> icons;
-
-		Label *label_log;
+		TextBox *logview;
 
 		// Driver Load button
-		ADD_BUTTON("          Driver Load", 33, width_30per, height_20per, width_2_5per, height_20per, true)
+		ADD_BUTTON("          Driver Load", 33, width_30per, height_20per, width_2_5per, height_20per, true);
 		button->setTooltip("Loading Vulnerable Drivers");
-//		button->setCallback([&order_flag, &flag, &buttonList] { auto it = buttonList.begin(); advance(it, (int)DRIVER_LOAD); (*it)->setEnabled(false); cout << "Driver Load!" << endl; it = buttonList.begin(); advance(it, (int)DLL_INJECTION); (*it)->setEnabled(true); });
-//		button->setCallback([&buttonList] { button_call1(buttonList, (int)DRIVER_LOAD, (int)DLL_INJECTION); });
-//		button->setCallback([&buttonList] { PUSH_BACK_LABEL("add label message") });
-//		button->setCallback([submit, &flag] {if (flag == 0) submit->setEnabled(true); cout << "Driver Load!" << endl; });
-		button->setCallback([] { labelLog->setVisible(true); });
-		
+		button->setCallback([&buttonList, &logview] { logview->setValue(""); button_call1(buttonList, (int)DRIVER_LOAD, (int)DLL_INJECTION); });
 
-
-		ADD_IMAGE(imageDirectory + "0/", width_2_5per, height_20per + (int)((height_20per - 81) / 2), true)
-		imgPanel->setCallback([&buttonList](int i) { if (button_check(buttonList, (int)DRIVER_LOAD, (int)DLL_INJECTION)) button_call1(buttonList, (int)DRIVER_LOAD, (int)DLL_INJECTION); });
-/*		imgPanel->mouseEnterEvent({ 1,2 }, true);
-		imgPanel->setEnabled(false);
-		imgPanel->setEnabled(true);
-*/
+		ADD_IMAGE(imageDirectory + "0/", width_2_5per, height_20per + (int)((height_20per - 81) / 2), true);
+		imgPanel->setCallback([&buttonList, &logview](int i) { logview->setValue("");  if (button_check(buttonList, (int)DRIVER_LOAD, (int)DLL_INJECTION)) button_call1(buttonList, (int)DRIVER_LOAD, (int)DLL_INJECTION); });
 
 
 		// DLL Injection buttion
-		ADD_BUTTON("           DLL Injection", 32, width_30per, height_20per, width_30per + width_2_5per * 2, height_20per, false)
+		ADD_BUTTON("           DLL Injection", 32, width_30per, height_20per, width_30per + width_2_5per * 2, height_20per, false);
 		button->setTooltip("User DLL injection into csrs.exe process");
-//		button->setCallback([] { cout << "DLL Injection!" << endl; });
 		button->setCallback([&buttonList] { button_call1(buttonList, (int)DLL_INJECTION, (int)SUBMIT); });
 
-		ADD_IMAGE(imageDirectory + "1/", width_2_5per * 2 + width_30per, height_20per + (int)((height_20per - 81) / 2), false)
-//		imgPanel->setCallback([](int i) { cout << "DLL Injection icon" << endl ; });
+		ADD_IMAGE(imageDirectory + "1/", width_2_5per * 2 + width_30per, height_20per + (int)((height_20per - 81) / 2), false);
 		imgPanel->setCallback([&buttonList](int i) { if (button_check(buttonList, (int)DLL_INJECTION, (int)SUBMIT)) button_call1(buttonList, (int)DLL_INJECTION, (int)SUBMIT); });
 
 
 		// Connection button
-		ADD_BUTTON("          Connection", 34, width_30per, height_20per, width_30per * 2 + width_2_5per * 3, height_20per, false)
+		ADD_BUTTON("          Connection", 34, width_30per, height_20per, width_30per * 2 + width_2_5per * 3, height_20per, false);
 		button->setTooltip("This button has a fairly long tooltip. It is so long, in ");
-//		button->setCallback([] { cout << "Connection!" << endl; });
-		button->setCallback([&buttonList] { button_call1(buttonList, (int)CONNECTION, (int)SCENARIO1); });
+		button->setCallback([&buttonList] { button_call1(buttonList, (int)CONNECTION, (int)TOGGLEO1); });
 
-		ADD_IMAGE(imageDirectory + "2/", width_2_5per * 3 + width_30per * 2, height_20per + (int)((height_20per - 81) / 2), false)
-//		imgPanel->setCallback([](int i) { cout << "Connection icon" << endl; });
-		imgPanel->setCallback([&buttonList](int i) { if (button_check(buttonList, (int)CONNECTION, (int)SCENARIO1)) button_call1(buttonList, (int)CONNECTION, (int)SCENARIO1); });
+		ADD_IMAGE(imageDirectory + "2/", width_2_5per * 3 + width_30per * 2, height_20per + (int)((height_20per - 81) / 2), false);
+		imgPanel->setCallback([&buttonList](int i) { if (button_check(buttonList, (int)CONNECTION, (int)TOGGLEO1)) button_call1(buttonList, (int)CONNECTION, (int)TOGGLEO1); });
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// toggle button
-		ADD_BUTTON("Script1(Infinite)", 30, width_30per, height_15per, width_2_5per, height_47per, false)
+		// Toggle button
+		ADD_BUTTON("Script1(Infinite)", 30, width_30per, height_15per, width_2_5per, height_47per, false);
 		button->setFlags(Button::ToggleButton);
 		button->setBackgroundColor(Color(0, 0, 255, 25));
-		button->setChangeCallback([](bool state) { cout << "Script1(Infinite) state: " << state << endl; });
+		button->setChangeCallback([&buttonList](bool state) { button_call1(buttonList, (int)TOGGLEO1, (int)state); });
 
-		ADD_BUTTON("Script2(MobVac)", 30, width_30per, height_15per, width_2_5per, height_47per + height_15per + height_1_25per, false)
+		ADD_BUTTON("Script2(MobVac)", 30, width_30per, height_15per, width_2_5per, height_47per + height_15per + height_1_25per, false);
 		button->setFlags(Button::ToggleButton);
 		button->setBackgroundColor(Color(0, 0, 255, 25));
 		button->setChangeCallback([](bool state) { cout << "Script2(MobVac) state: " << state << endl; });
+		button->setChangeCallback([&buttonList](bool state) { button_call1(buttonList, (int)TOGGLEO2, (int)state); });
 
-		ADD_BUTTON("Script3(Ability)", 30, width_30per, height_15per, width_2_5per, height_47per + height_15per *2 + height_1_25per * 2, false)
+		ADD_BUTTON("Script3(Ability)", 30, width_30per, height_15per, width_2_5per, height_47per + height_15per * 2 + height_1_25per * 2, false);
 		button->setFlags(Button::ToggleButton);
 		button->setBackgroundColor(Color(0, 0, 255, 25));
 		button->setChangeCallback([](bool state) { cout << "Script3(Ability) state: " << state << endl; });
+		button->setChangeCallback([&buttonList](bool state) { button_call1(buttonList, (int)TOGGLEO3, (int)state); });
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Label *label = new Label(wrapper, "Version: 1.0");
-		label->setPosition({ 6, height - 17 });
-		label->setPosition({ 6, height - 22 });
-
-		Label *labels = new Label(wrapper, "Dapdap Team.");
-		labels->setPosition({ width - 88, height - 17 });
-		labels->setPosition({ width - 88, height - 22 });
-//		Vector2i *value;
-//		*value = labels->position;
-//		labels->mouseButtonEvent(*value, 0, true, 0);
-
-		// Log View // 구상 실패~ > ~
-		TextBox *logview = new TextBox(wrapper, "");
-//		logview->setEditable(true);
-//		logview->setFontSize(20);
-//		logview->setValue("Log View");
+		// Log View
+		logview = new TextBox(wrapper, "");
+		logview->setFontSize(20);
+		logview->setValue("Log View");
 		logview->setFixedSize({ width - (width_30per + width_2_5per * 3), height_47per });
 		logview->setPosition({ width_30per + width_2_5per * 2, height_47per });
-//		logview->setTooltip("tq");
-
-
+		
 		vscroll_log = new VScrollPanel(window);
 		vscroll_log->setFixedSize({ width - (width_30per + width_2_5per * 3), height_47per });
 		vscroll_log->setPosition({ width_30per + width_2_5per * 2, height_47per });
@@ -171,24 +131,55 @@ int main(int /* argc */, char ** /* argv */) {
 		wrapper_log->setPosition({ width_30per + width_2_5per * 2, height_47per });
 		wrapper_log->setLayout(new GridLayout(Orientation::Horizontal, 1));// 1 columns
 
-		label_log = new Label(wrapper_log,"");
-//		label_log->setPosition({ 10, 8 });
-		label_log->setFontSize(20);
-		label_log->setCaption("Log View");
+		// 로그뷰 자동 업데이트를 구현하기 위해 라벨 사전에 생성
+		for (int i=0; i<LOG_LABEL_MAX; i++) {
+			ADD_LABEL("　");
+			labelList.push_back(labelLog);
+			labelListEmpty++;
+		}
 
-		PUSH_BACK_LABEL("tqtq")
-		PUSH_BACK_LABEL("qtqt")
-//		label_log->setVisible(false);
+		// Version & CopyRights
+		Label *label = new Label(wrapper, "Version: 1.0");
+		label->setPosition({ 6, height - 22 });
 
-
-//		int i=0;
-//		for (iter = buttonList.begin(); iter != buttonList.end(); ++iter) {			i++;		}
-//		cout << "개수 : " << i << endl;
+		label = new Label(wrapper, "2019. Team of Dapdap. All rights reserved.");
+		label->setPosition({ width - 238, height - 22 });
 
 		screen->performLayout();
 		screen->setVisible(true);
+
 //		ShowWindow(::GetConsoleWindow(), SW_HIDE);
-//		cout << vscroll->getRefCount() << endl;
+
+
+		////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////
+
+		// 코드 리펙토링 시, 다른 함수로 뺄 것
+		// popup
+		Screen *screen2 = new Screen({ width_popup, height_popup }, "A Production Crew", false);
+		Window *window2 = new Window(screen2, "");
+		window2->setPosition({ 0, 0 });
+		window2->setFixedSize({ width_popup, height_popup });
+
+		//makers Image
+		GLTexture texture2("");
+		auto data2 = texture2.load(imageDirectory + "makers.png");
+		using imagesDataType = vector<pair<GLTexture, GLTexture::handleType>>;
+		imagesDataType mImagesData2;
+		mImagesData2.emplace_back(std::move(texture2), std::move(data2));
+
+		auto imageView2 = new ImageView(window2, mImagesData2[0].first.texture());
+		imageView2->setPosition({ 0, 0 });
+		imageView2->setFixedSize({ width_popup, height_popup });
+		imageView2->setFixedScale(true);
+		
+		auto wrapper2 = new Widget(window2);
+		wrapper2->setFixedSize({ width_popup, height_popup });
+
+		screen2->performLayout();
+		screen2->setVisible(true);
+		
 		nanogui::mainloop();
 	}
 
@@ -199,6 +190,8 @@ int main(int /* argc */, char ** /* argv */) {
 bool button_call1(list<Button*> btnList, int before, int after)
 {
 	try {
+		REQUEST_HEADER req;
+		bool state = after; // For the meaning of the Toggle button
 		list<Button*>::iterator it = btnList.begin();
 		advance(it, before);
 
@@ -206,12 +199,13 @@ bool button_call1(list<Button*> btnList, int before, int after)
 		switch (before) {
 		// TODO. SUBMIT BUTTON FUNCTION
 		case SUBMIT:
-//			if (submit_button() == false) throw;
+			println("[INFO] ProcessName : " + processName);
+			// 동작 코드 없음
 			break;
 
 		// TODO. DRIVER_LOAD BUTTON FUNCTION
 		case DRIVER_LOAD:
-			cout << "[INFO] Click the Driver_Load Image button." << endl;
+			println("[INFO] Click the Driver_Load Image button");
 			if (!DriverLoader(hSCMgr, (LPSTR)"MitiBypass", (LPSTR)"MitiKiller.sys"))
 				ERROR_MACRO("DriverLoader");
 			if (!DriverLoader(hSCMgr, (LPSTR)"VulnDriver", (LPSTR)"Vuln.sys"))
@@ -223,21 +217,101 @@ bool button_call1(list<Button*> btnList, int before, int after)
 		// TODO. DLL_INJECTION BUTTON FUNCTION
 		case DLL_INJECTION:
 			DllLoader((LPSTR)"CheatServer.dll", (LPSTR)"csrss.exe");
-			cout << "[INFO] Click the DLL_Injection Image button." << endl;
+			println("[INFO] Click the DLL_Injection Image button");
 			break;
 
 		// TODO. CONNECTION BUTTON FUNCTION
 		case CONNECTION:
-			if (!(hClientPipe = CreateFile(PIPE_NAME, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL )))
+			if (!(hClientPipe = CreateFile(RECV_PIPE_NAME, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)))
+			{
+				// 에러 발생시 catch 문으로 보낼 것
 				ERROR_MACRO("CreateFile");
+			}
+			req.type = CHEAT_LIST::SetTargetHandle;
+			req.address = 0;
+			memset(req.buffer, 0, 256);
+			memcpy(req.buffer, processName.c_str(), processName.size());
+
+			if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+			{
+				// 에러 발생시 catch 문으로 보낼 것
+				ERROR_MACRO("WriteFile");
+			}
+
 			(*it)->setEnabled(false);
 			for (it = btnList.begin(), advance(it, after); it != btnList.end(); ++it)
 				(*it)->setEnabled(true);
-			cout << "[INFO] Click the Connection Image button." << endl;
+			println("[INFO] Click the Connection Image button");
+			return true;
+
+		// TODO. TOGGLEO1 BUTTON FUNCTION
+		case TOGGLEO1:
+			if (state)	// ON
+			{
+				if (MakeSendPacket(&req, CHEAT_LIST::ScriptInfiniteOn, 0, NULL))
+				{
+					if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+						ERROR_MACRO("WriteFile");
+				}
+				println("[INFO] Script1(Infinite) state: True");
+			}
+			else		// OFF
+			{
+				if (MakeSendPacket(&req, CHEAT_LIST::ScriptInfiniteOff, 0, NULL))
+				{
+					if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+						ERROR_MACRO("WriteFile");
+				}
+				println("[INFO] Script1(Infinite) state: False");
+			}
+			return true;
+
+		// TODO. TOGGLEO1 BUTTON FUNCTION
+		case TOGGLEO2:
+			if (state)	// ON
+			{
+				if (MakeSendPacket(&req, CHEAT_LIST::ScriptMobVacOn, 0, NULL))
+				{
+					if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+						ERROR_MACRO("WriteFile");
+				}
+				println("[INFO] Script2(MobVac) state: True");
+			}
+			else		// OFF
+			{
+				if (MakeSendPacket(&req, CHEAT_LIST::ScriptMobVacOff, 0, NULL))
+				{
+					if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+						ERROR_MACRO("WriteFile");
+				}
+				println("[INFO] Script2(MobVac) state: False");
+			}
+			return true;
+
+		// TODO. TOGGLEO1 BUTTON FUNCTION
+		case TOGGLEO3:
+			if (state)	// ON
+			{
+				if (MakeSendPacket(&req, CHEAT_LIST::ScriptAbilityOn, 0, NULL))
+				{
+					if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+						ERROR_MACRO("WriteFile");
+				}
+				println("[INFO] Script3(Ability) state: True");
+			}
+			else		// OFF
+			{
+				if (MakeSendPacket(&req, CHEAT_LIST::ScriptAbilityOff, 0, NULL))
+				{
+					if (!WriteFile(hClientPipe, &req, sizeof(REQUEST_HEADER), NULL, NULL))
+						ERROR_MACRO("WriteFile");
+				}
+				println("[INFO] Script3(Ability) state: False");
+			}
 			return true;
 
 		default:
-			ERROR_MESSAGE = "[ERR ] There is no information about the image button.";
+			ERROR_MESSAGE = "[ERR ] There is no information about the image button";
 			throw ERROR_MESSAGE;
 		}
 
@@ -247,37 +321,54 @@ bool button_call1(list<Button*> btnList, int before, int after)
 		(*it)->setEnabled(true);
 	}
 	catch (...) {
-		cout << ERROR_MESSAGE << endl;
+		println(ERROR_MESSAGE);
 		return false;
 	}
 
 	return true;
 }
-
 
 bool button_check(list<Button*> btnList, int before, int after)
 {
 	list<Button*>::iterator it = btnList.begin();
 	advance(it, before);
 	if ((*it)->enabled() == false) {
-		//if (before == DRIVER_LOAD)			ERROR_MESSAGE = "[ERR ] Image button Driver Load cannot be pressed.";
-		//else if (before == DLL_INJECTION)	ERROR_MESSAGE = "[ERR ] Image button DLL Injection cannot be pressed.";
-		//else if (before == CONNECTION)		ERROR_MESSAGE = "[ERR ] Image button Connection cannot be pressed.";
-		//else								ERROR_MESSAGE = "[ERR ] There is no information about the image button.";
-		//throw ERROR_MESSAGE;
 		return false;
 	}
 	return true;
 }
 
+void println(std::string msg) {
+#if LOGING_CONSOLE
+	std::cout << msg << std::endl;
+#else
+	if (labelListEmpty) { (labelList[LOG_LABEL_MAX - labelListEmpty--])->setCaption(msg); }
+	else { ADD_LABEL(msg); }
+#endif
+}
 
-bool submit_button()
-{
-	try {
+void println(std::string msg, NTSTATUS hexcode) {
+	stringstream ss;
+	ss << hex << hexcode;
+	msg += ss.str();
 
-	}
-	catch (...) {
-		return false;
-	}
-	return true;
+#if LOGING_CONSOLE
+	std::cout << msg << std::endl;
+#else
+	if (labelListEmpty) { (labelList[LOG_LABEL_MAX - labelListEmpty--])->setCaption(msg); }
+	else { ADD_LABEL(msg); }
+#endif
+}
+
+void println(std::string msg /* Message */, DWORD errcode) {
+	CString str;
+	str.Format("%d", errcode);
+	msg += str;
+
+#if LOGING_CONSOLE
+	std::cout << msg << std::endl;
+#else
+	if(labelListEmpty)	{ (labelList[LOG_LABEL_MAX - labelListEmpty--])->setCaption(msg); }
+	else				{ ADD_LABEL(msg); }
+#endif
 }

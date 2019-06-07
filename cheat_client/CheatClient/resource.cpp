@@ -137,7 +137,7 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			break;
 			case IDC_ECHOSEND:					
 				REQUEST_HEADER req;
-				req.type = CHEAT_LIST::GetTargetHandle;
+				req.type = CHEAT_LIST::SetTargetHandle;
 				req.address = 0;
 				memset(req.buffer, 0, 256);
 				memcpy(req.buffer, temp_process_buffer, strlen(temp_process_buffer));

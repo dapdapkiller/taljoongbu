@@ -1,9 +1,9 @@
 #pragma once
+//#include <nanogui/widget.h>
 /* Use OpenGL */
 #define STB_IMAGE_IMPLEMENTATION
 #include <memory>
 #include <stb_image.h>
-
 
 class GLTexture {
 public:
@@ -72,3 +72,23 @@ private:
 	std::string mTextureName;
 	GLuint mTextureId;
 };
+
+/*
+NAMESPACE_BEGIN(nanogui)
+class LabelButton : public Widget {
+	friend class Label;
+public:
+	LabelButton(Widget *parent, const std::string &caption, const std::string &font = "sans", int fontSize = -1);
+	/// Set the change callback (for toggle buttons).
+	void setChangeCallback(const std::function<void(bool)> &callback) { mChangeCallback = callback; }
+
+protected:
+	/// The callback issued for toggle buttons.
+	std::function<void(bool)> mChangeCallback;
+};
+
+LabelButton::LabelButton(Widget *parent, const std::string &caption, const std::string &font = "sans", int fontSize = -1) {
+
+}
+NAMESPACE_END(nanogui)
+*/
