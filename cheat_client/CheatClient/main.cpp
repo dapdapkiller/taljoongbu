@@ -4,7 +4,6 @@
 #include <list>
 #include "gui.h"
 #include "Utility.h"
-#include "resource.h"
 
 using namespace nanogui;
 using namespace std;
