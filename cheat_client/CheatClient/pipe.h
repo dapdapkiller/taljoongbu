@@ -1,14 +1,20 @@
-#include <stdint.h>
 #pragma once
+#include <stdint.h>
+
+#define RECV_PIPE_NAME "\\\\.\\pipe\\CheatRecv"
+#define SEND_PIPE_NAME "\\\\.\\pipe\\CheatSend"
 
 #pragma pack(push,1)
 typedef enum _CHEAT_LIST {
-	GetTargetHandle = 0,
-	Read = 1,
-	Write,
-	ScriptOn,
-	ScriptOff
-}CHEAT_LIST; // use by type
+	SetTargetHandle = 0,
+	GetServerState,
+	ScriptInfiniteOn,
+	ScriptMobVacOn,
+	ScriptAbilityOn,
+	ScriptInfiniteOff,
+	ScriptMobVacOff,
+	ScriptAbilityOff
+}CHEAT_LIST;
 
 typedef struct _REQUEST_HEADER {
 	uint8_t type;

