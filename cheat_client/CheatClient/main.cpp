@@ -184,6 +184,9 @@ int main(int /* argc */, char ** /* argv */) {
 	}
 
 	nanogui::shutdown();
+
+	CloseHandle(hClientPipe);
+	CloseHandle(hSCMgr);
 	return 0;
 }
 
